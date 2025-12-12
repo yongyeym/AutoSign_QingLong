@@ -1,5 +1,6 @@
 import os
 import logging
+import random
 import uuid
 import hashlib
 from datetime import datetime
@@ -75,6 +76,12 @@ def get_format_datetime(input_time: Optional[Union[datetime, str]] = None) -> Di
     now_day = "{:02d}".format(input_time.day)  # 处理为 当前日期 格式，且不足2位时前面补0
     return {"date": date, "time": time, "datetime": datetime_all, "weekday": now_weekday, "complete_time": datetime_all + " " + now_weekday, "year": now_year, "month": now_month, "day": now_day}  #返回包含所有格式的字典
 
+def get_format_process(process_num):
+    """
+    对小数表示的百分比数据进行格式化处理，处理为保留小数点后两位的百分比显示结果
+    """
+    return str(int(float(process_num) * 10000) / 100) + "%"  #将原小数*10000再转整型，去除多余的小数点后位数，再除以100，得到有小数点后2位的百分比显示结果
+
 def get_uuid(uuid_type: int = 4, need_upper: bool = True, need_hex: bool = False) -> str:
     """
     获取一个通用唯一标识符UUID，英文字母大写
@@ -121,6 +128,32 @@ def get_md5(content: str) -> str:
     :return:返回文本的MD5
     """
     return hashlib.md5(content.encode('utf-8')).hexdigest()
+
+def get_sha1(content: str) -> str:
+    """
+    :param content:需要计算SHA1的文本
+    :return:返回文本的SHA1
+    """
+    return hashlib.sha1(content.encode('utf-8')).hexdigest()
+
+def get_sha256(content: str) -> str:
+    """
+    :param content:需要计算SHA256的文本
+    :return:返回文本的SHA256
+    """
+    return hashlib.sha256(content.encode('utf-8')).hexdigest()
+
+def get_radom_string(length: int = 16) -> str:
+    """
+    获取指定长度的随机字符串
+    :param length:随机字符串的长度，默认16位
+    :return:返回随机字符串
+    """
+    random_list = [chr(i) for i in range(ord('a'), ord('z'))]
+    random_list += [chr(i) for i in range(ord('A'), ord('Z'))]
+    random_list += [chr(i) for i in range(ord('0'), ord('9'))]
+    random_list = ''.join(random_list)
+    return ''.join(random.choice(random_list) for _ in range(length))
 
 def send_notify(title: str, content: str = "无详细信息，请查看日志！"):
     """

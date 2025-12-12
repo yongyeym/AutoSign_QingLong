@@ -1,18 +1,22 @@
-# Log
+# Log日志
 *.log
 
-# IDE使用目录
+# IDE使用文件与目录
 .env
 .idea/
 .venv/
 /__pycache__/
 
-# 缩略图缓存
+# 系统缩略图缓存
 .DS_Store
 Thumbs.db
 
-# 测试文件、未完成文件
+# 测试用例
 test.py
-nga-sign.py
-ff14sqmall-sign.py
+
+# 未完成脚本
+nga_sign.py
+
+# 已失效脚本（待修复/无力修复废弃）
+ff14sqmall_sign.py
 /Utility/sqMall/
