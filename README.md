@@ -8,7 +8,7 @@
 ---
 可使用下方代码创建青龙订阅：
 ```
-task yongyeym_AutoSign_QingLong_main/kurobbs_sign.py
+ql repo https://github.com/yongyeym/AutoSign_QingLong.git
 ```
 ---
 ```
