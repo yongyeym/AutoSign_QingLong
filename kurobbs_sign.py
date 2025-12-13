@@ -508,5 +508,5 @@ if __name__ == "__main__":
             util.send_log(3, f"程序运行报错 - {e}")
             util.send_notify("【程序报错】鸣潮·签到", f"程序运行报错，请查看日志！\n\n错误信息：{e}")
     else:
-        print(f"缺少环境变量配置！需要添加环境变量：{value_check}")
+        util.send_log(2, f"缺少环境变量配置！需要添加环境变量：{value_check}")
         util.send_notify("【缺少环境变量】鸣潮·签到",f"缺少环境变量，请添加以下环境变量后再使用：{value_check}")
