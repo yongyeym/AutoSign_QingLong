@@ -22,7 +22,7 @@ task yongyeym_AutoSign_QingLong_main/kurobbs_sign.py
 1. 默认自动执行时间为每天凌晨3分，cron：0 3 0 * * ?
 2. 青龙面板添加环境变量：kurobbs，可从[库街区PC端网页](http://www.kurobbs.com/mc/home/9)获取账号token（ey开头）；
 3. 青龙面板添加环境变量：kuro_uid，库街区账号的UID，可在库街区个人页找到；
-4. 因目前重做的脚本有稳定性问题，保留了老版本仅支持鸣潮游戏签到的脚本kurobbs_only_mingchao_sign.py，如需使用此脚本需要额外手动修改脚本内的roleID，改为自己游戏UID。
+4. 因目前重做的脚本有稳定性问题，保留了老版本仅支持鸣潮游戏签到的脚本/OutdatedScript/kurobbs_only_mingchao_sign.py，如需使用此脚本需要额外手动修改脚本内的roleID，改为自己游戏UID。
 ---
 ```
 task yongyeym_AutoSign_QingLong_main/dnabbs_sign.py

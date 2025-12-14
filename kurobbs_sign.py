@@ -311,7 +311,7 @@ def do_signin_game(award, roleId, server_id):
     }
     response = get_response(url, data, 1)
     if response["code"] == 200:
-        message += f"鸣潮游戏签到成功：当月已签到 {response['data']['signinTimeNow']} 天，今天的游戏签到奖励是{award}。"
+        message += f"鸣潮游戏签到成功：当月已签到【还在验证这个参数】天，今天的游戏签到奖励是{award}。"
         return message
     elif response["code"] == 220:
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量kurobbs的值！")
