@@ -24,22 +24,22 @@ def doSign():
     NGA社区 每日签到，主要执行部分
     """
     url = "https://ngabbs.com/nuke.php"
-    cookie = (f"ngacn0comInfoCheckTime={util.get_timestamp(None, "s")}; "
+    cookie = (f"ngacn0comInfoCheckTime={util.get_timestamp(None, 's')}; "
               f"ngacn0comUserInfo={NGA_USER_INFO}; "
               f"ngacn0comUserInfoCheck={NGA_USER_INFO_CHECK}; "
               f"bbsmisccookies=%7B%7D; "
               f"access_token={NGA_COOKIE}; "
               f"access_uid={NGA_UID}")
-    data = (f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="__lib"\n\ncheck_in\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="__output"\n\n11\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="app_id"\n\n1100\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="device"\n\n{UUID_SHA256}\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="__act"\n\ncheck_in\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="access_uid"\n\n{NGA_UID}\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="access_token"\n\n{NGA_COOKIE}\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="__ngaClientChecksum"\n\n{NGA_CLIENT_CHECKSUM}\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name="__inchst"\n\nUTF-8\n'
-            f'------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}--\n')
+    data = (f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='__lib'\n\ncheck_in\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='__output'\n\n11\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='app_id'\n\n1100\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='device'\n\n{UUID_SHA256}\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='__act'\n\ncheck_in\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='access_uid'\n\n{NGA_UID}\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='access_token'\n\n{NGA_COOKIE}\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='__ngaClientChecksum'\n\n{NGA_CLIENT_CHECKSUM}\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}\nContent-Disposition: form-data; name='__inchst'\n\nUTF-8\n"
+            f"------WebKitFormBoundary{WEBKIT_FORM_BOUNDARY}--\n")
     headers = {
         'Host': 'ngabbs.com',
         'X-USER-AGENT': 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148  NGA_skull/10.1.36',
