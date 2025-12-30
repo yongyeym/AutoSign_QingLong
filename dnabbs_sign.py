@@ -351,8 +351,18 @@ def get_response(url: str, data: dict[str, str], content_length: str) -> any:
         'osVersion': "26.0.1",
         'token': ACCOUNT
     }
-    response = requests.post(url, data=data, headers=headers).json()
-    return response
+    last_exception = None
+    for i in range(3):
+        try:
+            response = requests.post(url, data=data, headers=headers, timeout=10)
+            response.raise_for_status()  # 如果响应状态码不是200，主动抛出异常进行重试访问
+            return response.json()
+        except requests.RequestException as e:
+            last_exception = e
+            util.send_log(1, f"URL访问失败（第{i + 1}次），5秒后重试……")
+            if i < 2:  # 失败3次以内时，等待5秒后重试请求
+                time.sleep(5)
+    raise last_exception  # 3次都失败时抛出最后一次失败时的异常，在主程序部分捕获，用于返回API访问失败导致程序运行失败的提示
 
 if __name__ == "__main__":
     """
@@ -385,8 +395,8 @@ if __name__ == "__main__":
                 time.sleep(2)
                 # 直接使用获取本月游戏签到奖励列表API，其中也会有今天是否签到的data，实际有专门获取今天是否进行社区和游戏签到的API haveSignInNew，但直接使用此API可以同时获取到今天签到必须的表单值和签到奖励内容更方便
                 game_sign, periodId, dayAwardId, award = get_signin_game_awards_list()
-                util.send_log(0,  f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、社区签到 {'已完成' if bbs_sign == 0 else '未完成'}、游戏签到 {'已完成' if game_sign == 0 else '未完成'}。")
-                notify_content += f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、社区签到 {'已完成' if bbs_sign == 0 else '未完成'}、游戏签到 {'已完成' if game_sign == 0 else '未完成'}。\n\n"
+                util.send_log(0,  f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、「皎皎角」签到 {'已完成' if bbs_sign == 0 else '未完成'}、「二重螺旋」签到 {'已完成' if game_sign == 0 else '未完成'}。")
+                notify_content += f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、「皎皎角」签到 {'已完成' if bbs_sign == 0 else '未完成'}、「二重螺旋」签到 {'已完成' if game_sign == 0 else '未完成'}。\n\n"
                 time.sleep(2)
                 # 如果需要浏览/点赞/分享，则获取帖子列表，返回1组帖子的id和发帖人id
                 if read > 0 or like > 0 or share > 0:
