@@ -4,8 +4,7 @@ import random
 import uuid
 import hashlib
 from datetime import datetime
-from typing import Dict, List, Union, Optional
-
+from typing import Dict, List, Union, Optional, NoReturn
 from Utility import notify
 
 def get_os_env(*args: str) -> tuple[str, ...]:
@@ -155,7 +154,7 @@ def get_radom_string(length: int = 16) -> str:
     random_list = ''.join(random_list)
     return ''.join(random.choice(random_list) for _ in range(length))
 
-def send_notify(title: str, content: str = "无详细信息，请查看日志！"):
+def send_notify(title: str, content: str = "无详细信息，请查看日志！") -> NoReturn:
     """
     发送通知推送，使用青龙自带的notify服务，需要在青龙配置中提前配置好任意推送渠道的key
     :param title：标题
@@ -165,38 +164,52 @@ def send_notify(title: str, content: str = "无详细信息，请查看日志！
     text = f"结束时间：\n\n{now_time}\n\n运行详情：\n\n{content}"
     notify.send(title, text)
 
-def send_log(log_level: int, content: str):
+#  初始化logging日志配置
+logging.basicConfig(
+    level=logging.INFO,  # 设置日志输出级别
+    format='%(asctime)s | %(levelname)s | %(message)s',  # 设置日志输出内容的格式化（日期时间 | 级别 | 信息）
+    datefmt='%Y年%m月%d日 %H:%M:%S',  # 设置日志的时间日期显示格式
+    encoding = "utf-8"
+)
+
+def send_log(content: str, log_level: str | int = "info") -> None:
     """
-    发送Log日志。basicConfig 日志基本配置：level 最低显示的日志级别
-    :param log_level：日志级别：0 信息 | 1 警告 | 2 错误 | 3 致命错误 | 其他 DEBUG
+    发送Log日志。默认输出INFO及以上级别日志
+    :param log_level：日志级别，默认info：info/0 信息 | warning/1 警告 | error/2 错误 | critical/3 致命错误 | debug/-1 DEBUG
     :param content：详细日志内容
     """
-    logging.basicConfig(
-        level=logging.INFO,  # 设置日志输出级别
-        format='%(asctime)s | %(levelname)s | %(message)s',  # 设置日志输出内容的格式化（日期时间 | 级别 | 信息）
-        datefmt='%Y年%m月%d日 %H:%M:%S',  # 设置日志的时间日期显示格式
-        encoding = "utf-8"
-    )
-    if log_level == 0:
+    log_level = str(log_level).lower().strip().split()  # 对传入的日志级别参数处理，转换为全小写、去除前后空格、以空格分割字符串
+    if "info" in log_level or "0" in log_level:
         logging.info(content)
-    elif log_level == 1:
+    elif "warning" in log_level or "1" in log_level:
         logging.warning(content)
-    elif log_level == 2:
+    elif "error" in log_level or "2" in log_level:
         logging.error(content)
-    elif log_level == 3:
+    elif "critical" in log_level or "3" in log_level:
         logging.critical(content)
-    else:
+    elif "debug" in log_level or "-1" in log_level:
         logging.debug(content)
+    else:
+        logging.info(content)  # 无法匹配传入的日志级别参数时默认输出info日志
+
+def send_log_debug(content: str) -> None:
+    """
+    发送Debug级别Log日志打印到控制台
+    :param content：详细日志内容
+    """
+    logger = logging.getLogger('debug_logger')
+    logger.setLevel(logging.DEBUG)
+    logger.debug(content)
 
 class SPException(Exception):
     """
     主动抛出异常，用于中断后续无效的函数执行并直接进行最后的通知推送
     使用 raise SPException("title", "content") 主动抛出
     """
-    def __init__(self, title: str = "意外的错误", content: str = "请查看日志！"):
+    def __init__(self, title: str = "运行失败", content: str = "请查看日志！") -> None:
         self.title = title
         self.content = content
         super().__init__(self.title)
-    def __str__(self):
+    def __str__(self) -> str:
         e2str = f"【{self.title}】\n\n错误详情为：" + self.content  # 定义直接输出e时的显示文本
         return e2str

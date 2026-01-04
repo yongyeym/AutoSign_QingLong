@@ -8,7 +8,6 @@ import time
 import traceback
 import requests
 from Utility.common import common_util as util
-from Utility.common.common_util import get_md5
 
 # 从环境变量获取Cookie
 NGA_COOKIE, NGA_UID, NGA_CLIENT_CHECKSUM = util.get_os_env("nga_cookie", "nga_uid", "nga_client_checksum")
@@ -16,10 +15,10 @@ NGA_COOKIE, NGA_UID, NGA_CLIENT_CHECKSUM = util.get_os_env("nga_cookie", "nga_ui
 UUID_SHA256 = "iOS;" + util.get_sha256(util.get_uuid(4, False, True))
 # 获取随机校验码，用于填充请求头中不会被检验的值
 NGA_USER_INFO = "%25" + util.get_radom_string()
-NGA_USER_INFO_CHECK = get_md5(NGA_USER_INFO)
+NGA_USER_INFO_CHECK = util.get_md5(NGA_USER_INFO)
 WEBKIT_FORM_BOUNDARY = util.get_radom_string()
 
-def doSign():
+def doSign() -> None:
     """
     NGA社区 每日签到，主要执行部分
     """
@@ -30,32 +29,27 @@ def doSign():
             if "签到成功" in response_data["data"][0]:
                 sum = response_data["data"][1]["sum"]
                 continued = response_data["data"][1]["continued"]
-                util.send_log(0, f"NGA社区 今日签到成功。当前连续签到 {continued} 天，累计签到 {sum} 天。")
-                util.send_notify("NGA社区·签到：已完成",
-                                 f"NGA社区 今日签到成功。\n\n当前连续签到 {continued} 天，累计签到 {sum} 天。")
+                util.send_log(f"NGA社区 今日签到成功。当前连续签到 {continued} 天，累计签到 {sum} 天。", "info")
+                util.send_notify("NGA社区·签到：已完成", f"NGA社区 今日签到成功。\n\n当前连续签到 {continued} 天，累计签到 {sum} 天。")
             else:
-                util.send_log(1, f"出现了未知错误,错误信息：{response_data['data'][0]}")
-                util.send_notify("【失败】NGA社区·签到",
-                                 f"出现了未知错误，请查看日志！\n\n错误信息：{response_data['data'][0]}")
+                util.send_log(f"出现了未知错误,错误信息：{response_data['data'][0]}", "warning")
+                util.send_notify("【失败】NGA社区·签到",f"出现了未知错误，请查看日志！\n\n错误信息：{response_data['data'][0]}")
         elif "error" in response_data:
             if "你今天已经签到了" in response_data["error"][0]:
-                util.send_log(0, "今天已经签到过，无需签到。")
-                util.send_notify("NGA社区·签到：已签到", "今天已经签到过，无需签到。")
+                util.send_log("今天已经签到过，无需签到。", "info")
+                util.send_notify("NGA社区·签到：已完成", "今天已经签到过，无需签到。")
             elif "你必须先登录论坛" in response_data["error"][0]:
-                util.send_log(2, "NGA账号Cookie已过期，无法签到。请更新环境变量nga_cookie的值！")
+                util.send_log("NGA账号Cookie已过期，无法签到。请更新环境变量【nga_cookie】！", "error")
                 util.send_notify("【Cookie过期】NGA社区·签到",
-                                 "NGA账号Cookie已过期，无法签到。需要更新环境变量nga_cookie的值！")
+                                 "NGA账号Cookie已过期，无法签到。请更新环境变量【nga_cookie】！")
             elif "CLIENT ERROR" in response_data["error"][0]:
-                util.send_log(2,
-                              "NGA客户端校验码已过期/不适配/非IOS端抓包的校验码，无法通过NGA服务器验证。请更新环境变量nga_client_checksum的值！")
-                util.send_notify("【Cookie过期】NGA社区·签到",
-                                 "NGA客户端校验码已过期/不适配/非IOS端抓包的校验码，无法NGA服务器验证。需要更新环境变量nga_client_checksum的值！")
+                util.send_log("NGA客户端校验码已过期/不适配/非IOS端抓包的校验码，无法通过NGA服务器验证。请更新环境变量【nga_client_checksum】！", "error")
+                util.send_notify("【Cookie过期】NGA社区·签到","NGA客户端校验码已过期/不适配/非IOS端抓包的校验码，无法NGA服务器验证。请更新环境变量【nga_client_checksum】！")
             else:
-                util.send_log(1, f"出现了未知错误,错误信息：{response_data['error']}")
-                util.send_notify("【失败】NGA社区·签到",
-                                 f"出现了未知错误，请查看日志！\n\n错误信息：{response_data['error']}")
+                util.send_log(f"出现了未知错误,错误信息：{response_data['error']}", "error")
+                util.send_notify("【失败】NGA社区·签到", f"出现了未知错误，请查看日志！\n\n错误信息：{response_data['error']}")
     except requests.RequestException as e:
-        util.send_log(3, f"API请求失败 - {e}")
+        util.send_log(f"API请求失败 - {e}", "critical")
         util.send_notify("【失败】NGA社区·签到", f"API请求失败，请查看日志！\n\n错误信息：{e}")
 
 def get_response(url) -> any:
@@ -105,13 +99,13 @@ def get_response(url) -> any:
             return response.json()
         except requests.RequestException as e:
             last_exception = e
-            util.send_log(1, f"URL访问失败（第{i + 1}次），5秒后重试……")
+            util.send_log(f"URL访问失败（第{i + 1}次），5秒后重试……", "warning")
             if i < 2:  # 失败3次以内时，等待5秒后重试请求
                 time.sleep(5)
     raise last_exception  # 3次都失败时抛出最后一次失败时的异常，在主程序部分捕获，用于返回API访问失败导致程序运行失败的提示
 
 if __name__ == "__main__":
-    util.send_log(0, "NGA社区 每日签到 - 开始执行")
+    util.send_log("NGA社区 每日签到 - 开始执行", "info")
     value_check = ""  # 存储环境变量为空的变量名用于推送通知正文内容
     if NGA_COOKIE is None:
         value_check += "【nga_cookie】"
@@ -123,9 +117,9 @@ if __name__ == "__main__":
         try:
             doSign()
         except Exception as e:
-            util.send_log(3, f"程序运行报错 - {e}")
-            util.send_log(3, f"{traceback.format_exc()}")
+            util.send_log(f"程序运行报错 - {e}", "critical")
+            util.send_log(f"{traceback.format_exc()}", "critical")
             util.send_notify("【程序报错】NGA社区·签到", f"程序运行报错，请查看日志！\n\n错误信息：{e}")
     else:
-        util.send_log(2, f"缺少环境变量，请添加以下环境变量后再使用：{value_check}")
+        util.send_log(f"缺少环境变量，请添加以下环境变量后再使用：{value_check}", "error")
         util.send_notify("【缺少环境变量】NGA社区·签到", f"缺少环境变量，请添加以下环境变量后再使用：{value_check}")

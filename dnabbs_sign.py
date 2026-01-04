@@ -359,7 +359,7 @@ def get_response(url: str, data: dict[str, str], content_length: str) -> any:
             return response.json()
         except requests.RequestException as e:
             last_exception = e
-            util.send_log(1, f"URL访问失败（第{i + 1}次），5秒后重试……")
+            util.send_log(f"URL访问失败（第{i + 1}次），5秒后重试……", "warning")
             if i < 2:  # 失败3次以内时，等待5秒后重试请求
                 time.sleep(5)
     raise last_exception  # 3次都失败时抛出最后一次失败时的异常，在主程序部分捕获，用于返回API访问失败导致程序运行失败的提示
@@ -370,10 +370,10 @@ if __name__ == "__main__":
     此任务必须回复5个不同的帖子才会计数，且经测试，疑似每个帖子都只有一次计数机会，即非同一天回复同一个帖子时，此任务也不会计数
     由于以上种种限制，导致无法直接对官方水贴回复5次来完成任务，随机水贴回复其他玩家帖子可能出现不可预料的情况，因此放弃自动处理此任务
     """
-    util.send_log(0, "二重螺旋·皎皎角 每日签到 - 开始执行")
+    util.send_log("二重螺旋·皎皎角 每日签到 - 开始执行", "info")
     notify_content = ""  # 储存用于推送通知正文的消息内容
     if ACCOUNT is None:
-        util.send_log(2, "缺少环境变量，请添加以下环境变量后再使用：dnabbs")
+        util.send_log("缺少环境变量，请添加以下环境变量后再使用：dnabbs", "error")
         util.send_notify("【缺少环境变量】二重螺旋·签到", "缺少环境变量，请添加以下环境变量后再使用：dnabbs（皎皎角账号Cookie）")
     else:
         try:
@@ -381,13 +381,13 @@ if __name__ == "__main__":
             attempt = 0  # 最多重复执行3次
             while restart_flag and attempt < 3:
                 if attempt > 0:
-                    util.send_log(1, f"社区交互任务执行出现意外的状况，开始重新执行，第{attempt + 2}次尝试中……")
+                    util.send_log(f"社区交互任务执行出现意外的状况，开始重新执行，第{attempt + 2}次尝试中……", "warning")
                     notify_content += f"社区交互任务执行出现意外的状况，开始重新执行，第{attempt + 2}次尝试中……\n\n"
                 restart_flag = False  # 循环开始将重新运行开关关闭
                 attempt += 1  # 每次运行令运行次数计数+1，超出3次后不论是否成功都不再尝试
                 # 获取用户皎皎角账号UID
                 userId = get_dnabbs_userid()
-                util.send_log(0, f"已获取用户皎皎角账号UID：{userId}。")
+                util.send_log(f"已获取用户皎皎角账号UID：{userId}。", "info")
                 notify_content += f"已获取用户皎皎角账号UID：{userId}。\n\n"
                 time.sleep(2)
                 # 获取用户今日任务完成情况，返回还需要进行多少次浏览帖子、点赞、社区签到、游戏签到、回复他人帖子次数的操作
@@ -395,35 +395,35 @@ if __name__ == "__main__":
                 time.sleep(2)
                 # 直接使用获取本月游戏签到奖励列表API，其中也会有今天是否签到的data，实际有专门获取今天是否进行社区和游戏签到的API haveSignInNew，但直接使用此API可以同时获取到今天签到必须的表单值和签到奖励内容更方便
                 game_sign, periodId, dayAwardId, award = get_signin_game_awards_list()
-                util.send_log(0,  f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、「皎皎角」签到 {'已完成' if bbs_sign == 0 else '未完成'}、「二重螺旋」签到 {'已完成' if game_sign == 0 else '未完成'}。")
+                util.send_log(f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、「皎皎角」签到 {'已完成' if bbs_sign == 0 else '未完成'}、「二重螺旋」签到 {'已完成' if game_sign == 0 else '未完成'}。", "info")
                 notify_content += f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、「皎皎角」签到 {'已完成' if bbs_sign == 0 else '未完成'}、「二重螺旋」签到 {'已完成' if game_sign == 0 else '未完成'}。\n\n"
                 time.sleep(2)
                 # 如果需要浏览/点赞/分享，则获取帖子列表，返回1组帖子的id和发帖人id
                 if read > 0 or like > 0 or share > 0:
                     postId, postUserId = get_dnabbs_new_formlist()
-                    util.send_log(0, "已获取最新帖子列表，开始执行……")
+                    util.send_log("已获取最新帖子列表，开始执行……", "info")
                     time.sleep(2)
                     # 如果需要点赞次数不为0，则执行点赞
                     if like > 0:
                         for i in range(like):
                             restart_flag = do_unlike(postId, postUserId)  # 先取消点赞，防止这个帖子本身就被用户点过赞了导致第一次点赞不计入任务完成数中
                             if restart_flag:
-                                util.send_log(1, f"执行第{i+1}次取消点赞操作时出现意外错误，可能是操作的帖子被删除了，重新开始社区交互任务执行流程……")
+                                util.send_log(f"执行第{i+1}次取消点赞操作时出现意外错误，可能是操作的帖子被删除了，重新开始社区交互任务执行流程……", "warning")
                                 break  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中止当前for循环
                             else:
-                                util.send_log(0, f"执行第{i + 1}次取消点赞操作完成……")
+                                util.send_log(f"执行第{i + 1}次取消点赞操作完成……", "info")
                             time.sleep(1)
                             restart_flag = do_like(postId, postUserId)  # 执行点赞
                             if restart_flag:
-                                util.send_log(1,f"执行第{i + 1}次点赞操作时出现意外错误，可能是操作的帖子被删除了，重新开始社区交互任务执行流程……")
+                                util.send_log(f"执行第{i + 1}次点赞操作时出现意外错误，可能是操作的帖子被删除了，重新开始社区交互任务执行流程……", "warning")
                                 break  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中止当前for循环
                             else:
-                                util.send_log(0, f"执行第{i + 1}次点赞操作完成……")
+                                util.send_log(f"执行第{i + 1}次点赞操作完成……", "info")
                             time.sleep(1)
-                        util.send_log(0, f"点赞任务完成，执行了{like}次点赞帖子操作；")
+                        util.send_log(f"点赞任务完成，执行了{like}次点赞帖子操作；", "info")
                         notify_content += f"点赞任务完成，执行了{like}次点赞帖子操作；\n\n"
                     else:
-                        util.send_log(0, "点赞任务已完成，不需要进行操作；")
+                        util.send_log("点赞任务已完成，不需要进行操作；", "info")
                         notify_content += "点赞任务已完成，不需要进行操作；\n\n"
                     if restart_flag:
                         continue  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中断后续代码运行并开始新的循环
@@ -432,15 +432,15 @@ if __name__ == "__main__":
                         for i in range(read):
                             restart_flag = get_post_detail(postId)
                             if restart_flag:
-                                util.send_log(1,f"执行第{i + 1}次浏览帖子操作时出现意外错误，可能是操作的帖子被删除了，重新开始社区交互任务执行流程……")
+                                util.send_log(f"执行第{i + 1}次浏览帖子操作时出现意外错误，可能是操作的帖子被删除了，重新开始社区交互任务执行流程……", "warning")
                                 break  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中止当前for循环
                             else:
-                                util.send_log(0, f"执行第{i + 1}次浏览帖子操作完成……")
+                                util.send_log(f"执行第{i + 1}次浏览帖子操作完成……", "info")
                             time.sleep(3)
-                        util.send_log(0, f"浏览任务完成，执行了{read}次浏览帖子操作；")
+                        util.send_log(f"浏览任务完成，执行了{read}次浏览帖子操作；", "info")
                         notify_content += f"浏览任务完成，执行了{read}次浏览帖子操作；\n\n"
                     else:
-                        util.send_log(0, "浏览任务已完成，不需要进行操作；")
+                        util.send_log("浏览任务已完成，不需要进行操作；", "info")
                         notify_content += "浏览任务已完成，不需要进行操作；\n\n"
                     if restart_flag:
                         continue  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中断后续代码运行并开始新的循环
@@ -449,54 +449,54 @@ if __name__ == "__main__":
                         for i in range(share):
                             restart_flag = do_share()
                             if restart_flag:
-                                util.send_log(1, f"执行第{i + 1}次同步分享帖子任务进度操作时出现意外错误，重新开始社区交互任务执行流程……")
+                                util.send_log(f"执行第{i + 1}次同步分享帖子任务进度操作时出现意外错误，重新开始社区交互任务执行流程……", "warning")
                                 break  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中止当前for循环
                             else:
-                                util.send_log(0, f"执行第{i + 1}次同步分享帖子任务进度操作完成……")
+                                util.send_log(f"执行第{i + 1}次同步分享帖子任务进度操作完成……", "info")
                             time.sleep(3)
-                        util.send_log(0, f"分享任务完成，执行了{share}次分享帖子操作；")
+                        util.send_log(f"分享任务完成，执行了{share}次分享帖子操作；", "info")
                         notify_content += f"分享任务完成，执行了{share}次分享帖子操作；\n\n"
                     else:
-                        util.send_log(0, "分享任务已完成，不需要进行操作；")
+                        util.send_log("分享任务已完成，不需要进行操作；", "info")
                         notify_content += "分享任务已完成，不需要进行操作；\n\n"
                 else:
-                    util.send_log(0, "今日社区交互任务均已完成，不需要进行操作；")
+                    util.send_log("今日社区交互任务均已完成，不需要进行操作；", "info")
                     notify_content += "今日社区交互任务均已完成，不需要进行操作；\n\n"
             if attempt == 2 and restart_flag:
-                util.send_log(2, "社区交互任务执行出现意外的状况，已重复尝试3次仍未成功，放弃此部分任务的执行！")
+                util.send_log("社区交互任务执行出现意外的状况，已重复尝试3次仍未成功，放弃此部分任务的执行！", "error")
                 notify_content += "社区交互任务执行出现意外的状况，已重复尝试3次仍未成功，放弃此部分任务的执行！\n\n"
 
             # 如果需要社区签到，则执行签到
             if bbs_sign == 1:
                 message_bbs_sign = do_signin_bbs()
-                util.send_log(0, message_bbs_sign)
+                util.send_log(message_bbs_sign, "info")
                 notify_content += f"{message_bbs_sign}\n\n"
                 time.sleep(5)
             else:
-                util.send_log(0, "社区签到已完成，不需要进行操作；")
+                util.send_log("社区签到已完成，不需要进行操作；", "info")
                 notify_content += "社区签到已完成，不需要进行操作；\n\n"
             # 如果需要游戏签到，则执行签到
             if game_sign == 1:
                 message_game_sign = do_signin_game(periodId, dayAwardId, award)
-                util.send_log(0, message_game_sign)
+                util.send_log(message_game_sign, "info")
                 notify_content += f"{message_game_sign}\n\n"
                 time.sleep(5)
             else:
-                util.send_log(0, "游戏签到已完成，不需要进行操作；")
+                util.send_log("游戏签到已完成，不需要进行操作；", "info")
                 notify_content += f"游戏签到已完成，不需要进行操作。今天的游戏签到奖励是 {award}；\n\n"
             # 全部完成，最终推送
-            util.send_log(0, "二重螺旋·皎皎角 每日签到 - 执行完成")
+            util.send_log("二重螺旋·皎皎角 每日签到 - 执行完成", "info")
             util.send_notify("二重螺旋·签到：已完成", notify_content)
         except SPException as e:
             # 主动抛出的异常，用于在出现非访问失败的问题时中断后续函数执行
-            util.send_log(2, e.content)
+            util.send_log(e.content, "error")
             util.send_notify(f"【{e.title}】二重螺旋·签到", e.content)
         except requests.RequestException as e:
             # API访问失败的异常中断
-            util.send_log(3, f"API请求失败 - {e}")
+            util.send_log(f"API请求失败 - {e}", "error")
             util.send_notify("【失败】二重螺旋·签到", f"API请求失败，请查看日志！\n\n错误信息：{e}")
         except Exception as e:
             # 其他所有异常
-            util.send_log(3, f"程序运行报错 - {e}")
-            util.send_log(3, f"{traceback.format_exc()}")
+            util.send_log(f"程序运行报错 - {e}", "critical")
+            util.send_log(f"{traceback.format_exc()}", "critical")
             util.send_notify("【程序报错】二重螺旋·签到", f"程序运行报错，请查看日志！\n\n错误信息：{e}")
