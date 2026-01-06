@@ -15,8 +15,8 @@ from Utility.common.common_util import SPException
 UUID = util.get_uuid(4, True, True)
 # 从本地配置文件获取是否使用本地Cookie
 USE_LOCAL_COOKIE = util.get_config_env("use_local_cookie")[0] == "1"
-# 从本地配置文件获取URL访问失败重试的相关配置
-URL_TIMEOUT, URL_RETRY_TIMES, URL_RETRY_INTERVAL = map(lambda x: int(x) if x.isdigit() else 0, util.get_config_env("url_timeout", "url_retry_times", "url_retry_interval"))
+# 从本地配置文件获取URL访问失败重试的相关配置，获取失败则设为5
+URL_TIMEOUT, URL_RETRY_TIMES, URL_RETRY_INTERVAL = map(lambda x: int(x) if x.isdigit() else 5, util.get_config_env("url_timeout", "url_retry_times", "url_retry_interval"))
 # 从环境变量或本地ini文件获取Cookie和UID
 ACCOUNT, USER_ID = util.get_config_env("kurobbs", "kuro_uid", section="COOKIE") if USE_LOCAL_COOKIE else util.get_os_env("kurobbs", "kuro_uid")
 
@@ -419,7 +419,7 @@ def get_response(url: str, data: dict[str, str], headers_type: int) -> any:
             return response.json()
         except requests.RequestException as e:
             last_exception = e
-            util.send_log(f"URL访问失败（第{i + 1}次），5秒后重试……", "warning")
+            util.send_log(f"URL访问失败（第{i + 1}次），{URL_RETRY_INTERVAL}秒后重试……", "warning")
             if i < URL_RETRY_TIMES:  # 失败时，等待指定秒后重试请求
                 time.sleep(URL_RETRY_INTERVAL)
     raise last_exception  # 重试多次都失败时抛出最后一次失败时的异常，在主程序部分捕获，用于返回API访问失败导致程序运行失败的提示
