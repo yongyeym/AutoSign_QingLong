@@ -9,12 +9,13 @@ from pathlib import Path
 from typing import Dict, List, Union, Optional, NoReturn
 from Utility import notify
 
-# 配置文件相关
+# 配置文件路径
 CONFIG_DIR = Path(__file__).parent.parent.parent / "Config"
 CONFIG_PATH = CONFIG_DIR / "config.ini"
+# 配置文件不存在时自动创建使用的默认值
 DEFAULT_CONFIG = {
     "use_local_cookie": "0",
-    "url_timeout": "10",
+    "url_timeout": "15",
     "url_retry_times": "5",
     "url_retry_interval": "5",
 }
@@ -52,7 +53,7 @@ def get_config_env(*args: str, section: str = "DEFAULT") -> tuple[str | None, ..
             return (None,) * len(args)  # 创建默认配置文件失败，返回包含与传入参数数量相同数量的None的元组
     # 读取配置文件，若读取失败则返回包含与传入参数数量相同数量的None的元组
     try:
-        config.read(CONFIG_PATH)
+        config.read(CONFIG_PATH, encoding="utf-8")
     except configparser.Error:
         return (None,) * len(args)
     # 检查是否有传入的section，若不存在则使用默认的DEFAULT查询
@@ -70,7 +71,7 @@ def write_config_init() -> bool:
     config['DEFAULT'] = DEFAULT_CONFIG
     config['COOKIE'] = COOKIE_CONFIG
     try:
-        with open(CONFIG_PATH, 'w') as f:
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             config.write(f)
     except IOError as e:
         send_log(f"无法创建或写入配置文件{CONFIG_PATH}！错误信息:{e}", "error")
@@ -108,7 +109,7 @@ def write_config_env(key: str, value: str = "", section: str = "DEFAULT") -> boo
         if section not in config:
             config.add_section(section) # 如果不存在此section，则添加
         config.set(section, key, value)
-        with open(CONFIG_PATH, 'w') as f:
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
             config.write(f)
     except configparser.Error:
         send_log(f"[{section}] {key} = {value} 无法读取配置文件{CONFIG_PATH}！", "error")
@@ -314,3 +315,12 @@ class SPException(Exception):
     def __str__(self) -> str:
         e2str = f"【{self.title}】\n\n错误详情为：" + self.content  # 定义直接输出e时的显示文本
         return e2str
+
+# 全脚本通用配置项初始化获取
+USE_LOCAL_COOKIE, URL_TIMEOUT, URL_RETRY_TIMES, URL_RETRY_INTERVAL = map(lambda x: int(x) if x.isdigit() else None, get_config_env("use_local_cookie", "url_timeout", "url_retry_times", "url_retry_interval"))
+# 是否使用本地配置文件的Cookie，只有获取的值为1时启用（True），其他值均不启用（False）
+USE_LOCAL_COOKIE = True if USE_LOCAL_COOKIE == 1 else False
+# URL请求超时时间（秒）、重试次数、重试间隔（秒），获取的值不是整数时使用默认值：超时15秒、重试5次、间隔5秒
+URL_TIMEOUT = URL_TIMEOUT if URL_TIMEOUT is not None else 15
+URL_RETRY_TIMES = URL_RETRY_TIMES if URL_RETRY_TIMES is not None else 5
+URL_RETRY_INTERVAL = URL_RETRY_INTERVAL if URL_RETRY_INTERVAL is not None else 5
