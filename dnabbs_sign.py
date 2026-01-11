@@ -16,7 +16,7 @@ CONTENT_LENGTH_NUM = {"forum/list" : "78", "forum/like" : "146", "shareTask" : "
 # 获取一个随机生成的UUID，在本次运行期间使用，用于给请求头的devCode赋值
 UUID = util.get_uuid(4, True, False)
 # 从环境变量或本地ini文件获取Cookie
-ACCOUNT = util.get_config_env("dnabbs", section="COOKIE")[0] if util.USE_LOCAL_COOKIE else util.get_os_env("dnabbs")[0]
+ACCOUNT, GAMESIGN_KEY, GAMESIGN_PARAM = util.get_config_env("dnabbs", "dna_gamesign_key", "dna_gamesign_param", section="COOKIE") if util.USE_LOCAL_COOKIE else util.get_os_env("dnabbs", "dna_gamesign_key", "dna_gamesign_param")
 
 def get_dnabbs_userid() -> str:
     """
@@ -31,7 +31,7 @@ def get_dnabbs_userid() -> str:
     response = get_response(url, data, CONTENT_LENGTH_NUM["user/mineV2"])
     if response["code"] == 200:
         return  response["data"]["mine"]["userId"]
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 500:
         raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
@@ -66,7 +66,7 @@ def get_dnabbs_taskprocess(userId: str) -> tuple[int, ...]:
             if data[i]['remark'] == "签到":
                 bbs_sign = data[i]['times'] - data[i]['completeTimes']
         return int(read), int(like), int(share), int(bbs_sign), int(comment)
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 500:
         raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
@@ -96,7 +96,7 @@ def get_dnabbs_new_formlist() -> tuple[str, str]:
     if response["code"] == 200:
         data = response["data"]["postList"][0]
         return data["postId"], data["userId"]
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 500:
         raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
@@ -119,7 +119,7 @@ def get_post_detail(postId: str) -> bool:
     response = get_response(url, data, CONTENT_LENGTH_NUM["getPostDetail"])
     if response["code"] == 200:
         return False
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
@@ -153,7 +153,7 @@ def do_like(postId: str, toUserId: str) -> bool:
     response = get_response(url, data, CONTENT_LENGTH_NUM["forum/like"])
     if response["code"] == 200:
         return False
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
@@ -186,7 +186,7 @@ def do_unlike(postId: str, toUserId: str) -> bool:
     response = get_response(url, data, CONTENT_LENGTH_NUM["forum/like"])
     if response["code"] == 200:
         return False
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
@@ -208,7 +208,7 @@ def do_share() -> bool:
     response = get_response(url, data, CONTENT_LENGTH_NUM["shareTask"])
     if response["code"] == 200:
         return False
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
@@ -245,7 +245,7 @@ def do_signin_bbs() -> str:
             else:
                 message += "。"
         return message
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 10000:
         #  重复签到情况
@@ -286,7 +286,7 @@ def get_signin_game_awards_list() -> tuple[int, str, str, str]:
                 award = f"「{award_list[i]['awardName']}」*{award_list[i]['awardNum']}"
                 break  # 找到当天的奖励了，直接中断for循环
         return game_sign, periodId, dayAwardId, award
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 500:
         raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
@@ -307,20 +307,24 @@ def do_signin_game(periodId: str, dayAwardId: str, award: str) -> str:
     data = {
         'signinType': "1",  # 未知用途
         'periodId': periodId,  # 可能是游戏签到月份的ID序号，在encourage/signin/show API的返回中“dayAward”项内的每一组数据，都有一个“periodId”项
-        'dayAwardId': dayAwardId  # 签到奖励列表对应天数的ID，在encourage/signin/show API的返回中“dayAward”项内的每一组数据，都有一个“id”项
+        'dayAwardId': dayAwardId,  # 签到奖励列表对应天数的ID，在encourage/signin/show API的返回中“dayAward”项内的每一组数据，都有一个“id”项
+        'timeStamp': util.get_timestamp(),  # 获取当前时间戳
+        'sign': GAMESIGN_PARAM,  # API签名
     }
     response = get_response(url, data, CONTENT_LENGTH_NUM["signInGame"])
     if response["code"] == 200:
         message += f"二重螺旋游戏签到成功：当月已签到 {response['data']['signinTimeNow']} 天，今天的游戏签到奖励是{award}。"
         return message
-    elif response["code"] == 220:
+    elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 10000:
-        #  重复签到，或periodId/dayAwardId不正确导致签到失败，填写正确的id重复签到也会返回同样的参数错误信息，所以无法确定具体是哪个情况
-        message += f"二重螺旋游戏签到失败，或者今天已经签到过了，今天的游戏签到奖励是 {award}。"
+        #  重复签到，或任意请求表单传入的值不正确导致签到失败，均会返回此错误信息，无法确定具体是哪个情况
+        message += f"二重螺旋游戏今天已经签到过了，或者API参数错误导致签到失败，今天的游戏签到奖励是 {award}。"
         return message
     elif response["code"] == 500:
         raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+    elif response["code"] == 101004:
+        raise SPException("失败", f"API签名Key错误，请尝试更新环境变量【dna_gamesign_key】和【dna_gamesign_param】！错误信息：{response['msg']}")
     else:
         raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
@@ -351,6 +355,8 @@ def get_response(url: str, data: dict[str, str], content_length: str) -> any:
         'osVersion': "26.0.1",
         'token': ACCOUNT
     }
+    if url == "https://dnabbs-api.yingxiong.com/encourage/signin/signin":
+        headers["key"] = GAMESIGN_KEY
     last_exception = None
     for i in range(util.URL_RETRY_TIMES):
         try:
@@ -372,10 +378,14 @@ if __name__ == "__main__":
     """
     util.send_log("二重螺旋·皎皎角 每日签到 - 开始执行", "info")
     notify_content = ""  # 储存用于推送通知正文的消息内容
+    value_check = ""  # 存储环境变量为空的变量名用于推送通知正文内容
     if ACCOUNT is None:
-        util.send_log("缺少环境变量，请添加以下环境变量后再使用：dnabbs", "error")
-        util.send_notify("【缺少环境变量】二重螺旋·签到", "缺少环境变量，请添加以下环境变量后再使用：dnabbs（皎皎角账号Cookie）")
-    else:
+        value_check += "【dnabbs】"
+    if GAMESIGN_KEY is None:
+        value_check += "【dna_gamesign_key】"
+    if GAMESIGN_PARAM is None:
+        value_check += "【dna_gamesign_param】"
+    if value_check == "":
         try:
             restart_flag = True  # 是否需要重新运行，默认为True用于启动第一次循环执行
             attempt = 0  # 最多重复执行3次
@@ -500,3 +510,6 @@ if __name__ == "__main__":
             util.send_log(f"程序运行报错 - {e}", "critical")
             util.send_log(f"{traceback.format_exc()}", "critical")
             util.send_notify("【程序报错】二重螺旋·签到", f"程序运行报错，请查看日志！\n\n错误信息：{e}")
+    else:
+        util.send_log(f"缺少环境变量，请添加以下环境变量后再使用：{value_check}", "error")
+        util.send_notify("【缺少环境变量】二重螺旋·签到",f"缺少环境变量，请添加以下环境变量后再使用：{value_check}")

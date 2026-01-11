@@ -21,6 +21,8 @@ DEFAULT_CONFIG = {
 }
 COOKIE_CONFIG = {
     "dnabbs": "",
+    "dna_gamesign_key": "",
+    "dna_gamesign_param": "",
     "kurobbs": "",
     "kuro_uid": "",
     "nga_cookie": "",
@@ -320,6 +322,8 @@ class SPException(Exception):
 USE_LOCAL_COOKIE, URL_TIMEOUT, URL_RETRY_TIMES, URL_RETRY_INTERVAL = map(lambda x: int(x) if x.isdigit() else None, get_config_env("use_local_cookie", "url_timeout", "url_retry_times", "url_retry_interval"))
 # 是否使用本地配置文件的Cookie，只有获取的值为1时启用（True），其他值均不启用（False）
 USE_LOCAL_COOKIE = True if USE_LOCAL_COOKIE == 1 else False
+if USE_LOCAL_COOKIE:
+    send_log("当前配置：使用本地配置文件中的Cookie！", "info")
 # URL请求超时时间（秒）、重试次数、重试间隔（秒），获取的值不是整数时使用默认值：超时15秒、重试5次、间隔5秒
 URL_TIMEOUT = URL_TIMEOUT if URL_TIMEOUT is not None else 15
 URL_RETRY_TIMES = URL_RETRY_TIMES if URL_RETRY_TIMES is not None else 5

@@ -56,8 +56,11 @@ task yongyeym_AutoSign_QingLong_main/dnabbs_sign.py
 ##### 皎皎角社区每日签到、二重螺旋每日签到、皎皎角社区每日任务（点赞、浏览、分享）
 ##### 和库街区APP几乎一模一样的构成，ctrl+c/v后仅需少量修改就可以直接用了，真方便~
 ##### 关于回复帖子5次的每日任务：经测试，此任务必须回复5个不同的帖子才会计数，且每个帖子都只有一次计数机会，即非同一天回复同一个帖子时，此任务也不会计数。由于以上限制，无法直接对官方水贴回复5次来完成任务，随机水贴回复其他玩家帖子可能出现不可预料的情况，因此放弃自动处理此任务。
-1. 默认自动执行时间为每天凌晨3分，cron：0 3 0 * * ?
+##### ⚠ 目前游戏签到更新了签名验证，无法随机生成值进行验证，需要使用手机版APP进行签到抓包获取，只测试了IOS端 ⚠
+2. 默认自动执行时间为每天凌晨3分，cron：0 3 0 * * ?
 2. 青龙面板添加环境变量：dnabbs，可从[皎皎角PC端网页](https://dnabbs.yingxiong.com/pc)获取账号cookie（ey开头）；
+3. 青龙面板添加环境变量：dna_gamesign_key，游戏签到API专用的签名验证key，使用手机版抓包，进行游戏签到，抓取dnabbs-api.yingxiong.com/encourage/signin/signin的POST请求，从请求头header中找到key；
+4. 青龙面板添加环境变量：dna_gamesign_param，游戏签签到API专用的签名验证值，同上抓包，获取请求表单中sign的值；
 ---
 ```
 task yongyeym_AutoSign_QingLong_main/nga_sign.py
