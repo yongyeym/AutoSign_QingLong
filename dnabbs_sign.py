@@ -34,9 +34,9 @@ def get_dnabbs_userid() -> str:
     elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("获取账号ID失败", f"获取账号ID失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败",f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("获取账号ID失败",f"获取账号ID失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_dnabbs_taskprocess(userId: str) -> tuple[int, ...]:
     """
@@ -69,9 +69,9 @@ def get_dnabbs_taskprocess(userId: str) -> tuple[int, ...]:
     elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("获取社区每日任务进度失败", f"获取社区每日任务进度失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败",f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("获取社区每日任务进度失败",f"获取社区每日任务进度失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_dnabbs_new_formlist() -> tuple[str, str]:
     """
@@ -99,9 +99,9 @@ def get_dnabbs_new_formlist() -> tuple[str, str]:
     elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("获取最新帖子列表失败", f"获取最新帖子列表失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("获取最新帖子列表失败", f"获取最新帖子列表失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_post_detail(postId: str) -> bool:
     """
@@ -124,9 +124,9 @@ def get_post_detail(postId: str) -> bool:
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("浏览帖子任务失败", f"浏览帖子任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("浏览帖子任务失败", f"浏览帖子任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_like(postId: str, toUserId: str) -> bool:
     """
@@ -158,9 +158,9 @@ def do_like(postId: str, toUserId: str) -> bool:
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_unlike(postId: str, toUserId: str) -> bool:
     """
@@ -191,9 +191,9 @@ def do_unlike(postId: str, toUserId: str) -> bool:
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_share() -> bool:
     """
@@ -213,9 +213,9 @@ def do_share() -> bool:
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("社区分享任务失败", f"社区分享任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("社区分享任务失败", f"社区分享任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_signin_bbs() -> str:
     """
@@ -252,9 +252,9 @@ def do_signin_bbs() -> str:
         message += "皎皎角社区今天已经签到过了，无需签到。"
         return message
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("皎皎角签到失败", f"皎皎角签到失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("皎皎角签到失败", f"皎皎角签到失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_signin_game_awards_list() -> tuple[int, str, str, str]:
     """
@@ -289,9 +289,9 @@ def get_signin_game_awards_list() -> tuple[int, str, str, str]:
     elif response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("获取二重螺旋游戏签到奖励失败", f"获取二重螺旋游戏签到奖励失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("获取二重螺旋游戏签到奖励失败", f"获取二重螺旋游戏签到奖励失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_signin_game(periodId: str, dayAwardId: str, award: str) -> str:
     """
@@ -312,21 +312,21 @@ def do_signin_game(periodId: str, dayAwardId: str, award: str) -> str:
         'sign': GAMESIGN_PARAM,  # API签名
     }
     response = get_response(url, data, CONTENT_LENGTH_NUM["signInGame"])
-    if response["code"] == 200:
-        message += f"二重螺旋游戏签到成功：当月已签到 {response['data']['signinTimeNow']} 天，今天的游戏签到奖励是{award}。"
+    if response["code"] == 200 or response["code"] == "200":
+        message += f"二重螺旋游戏签到成功：当月已签到 {response['data']['signinTimeNow']} 天。今天的游戏签到奖励是{award}。"
         return message
-    elif response["code"] == "220":
-        raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 10000:
+    elif response["code"] == 220 or response["code"] == "220":
+        raise SPException("Cookie失效", "Cookie失效，请更新环境变量【dnabbs】的值！")
+    elif response["code"] == 10000 or response["code"] == "10000":
         #  重复签到，或任意请求表单传入的值不正确导致签到失败，均会返回此错误信息，无法确定具体是哪个情况
         message += f"二重螺旋游戏今天已经签到过了，或者API参数错误导致签到失败，今天的游戏签到奖励是 {award}。"
         return message
-    elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
-    elif response["code"] == 101004:
-        raise SPException("失败", f"API签名Key错误，请尝试更新环境变量【dna_gamesign_key】和【dna_gamesign_param】！错误信息：{response['msg']}")
+    elif response["code"] == 500 or response["code"] == "500":
+        raise SPException("二重螺旋游戏签到失败", f"二重螺旋游戏签到失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+    elif response["code"] == 101004 or response["code"] == "101004":
+        raise SPException("二重螺旋游戏签到失败", f"二重螺旋游戏签到失败！API签名Key错误，请尝试更新环境变量【dna_gamesign_key】和【dna_gamesign_param】！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("二重螺旋游戏签到失败", f"二重螺旋游戏签到失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_response(url: str, data: dict[str, str], content_length: str) -> any:
     """
@@ -500,16 +500,16 @@ if __name__ == "__main__":
         except SPException as e:
             # 主动抛出的异常，用于在出现非访问失败的问题时中断后续函数执行
             util.send_log(e.content, "error")
-            util.send_notify(f"【{e.title}】二重螺旋·签到", e.content)
+            util.send_notify(f"【{e.title}】二重螺旋·签到", f"{notify_content}{e.content}")
         except requests.RequestException as e:
             # API访问失败的异常中断
             util.send_log(f"API请求失败 - {e}", "error")
-            util.send_notify("【失败】二重螺旋·签到", f"API请求失败，请查看日志！\n\n错误信息：{e}")
+            util.send_notify("【失败】二重螺旋·签到", f"{notify_content}API请求失败，请查看日志！\n\n错误信息：{e}")
         except Exception as e:
             # 其他所有异常
             util.send_log(f"程序运行报错 - {e}", "critical")
             util.send_log(f"{traceback.format_exc()}", "critical")
-            util.send_notify("【程序报错】二重螺旋·签到", f"程序运行报错，请查看日志！\n\n错误信息：{e}")
+            util.send_notify("【程序报错】二重螺旋·签到", f"{notify_content}程序运行报错，请查看日志！\n\n错误信息：{e}")
     else:
         util.send_log(f"缺少环境变量，请添加以下环境变量后再使用：{value_check}", "error")
         util.send_notify("【缺少环境变量】二重螺旋·签到",f"缺少环境变量，请添加以下环境变量后再使用：{value_check}")

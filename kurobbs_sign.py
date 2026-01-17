@@ -52,9 +52,9 @@ def get_kurobbs_userid() -> tuple[str, str]:
     elif response["code"] == 220:
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量kurobbs的值！")
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("获取账号ID失败", f"获取账号ID失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败",f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("获取账号ID失败",f"获取账号ID失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_kurobbs_taskprocess() -> tuple[int, ...]:
     """
@@ -84,9 +84,9 @@ def get_kurobbs_taskprocess() -> tuple[int, ...]:
     elif response["code"] == 220:
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量kurobbs的值！")
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("获取社区每日任务进度失败", f"获取社区每日任务进度失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败",f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("获取社区每日任务进度失败",f"获取社区每日任务进度失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_kurobbs_new_formlist() -> tuple[str, str]:
     """
@@ -114,9 +114,9 @@ def get_kurobbs_new_formlist() -> tuple[str, str]:
     elif response["code"] == 220:
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量kurobbs的值！")
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("获取最新帖子列表失败", f"获取最新帖子列表失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("获取最新帖子列表失败", f"获取最新帖子列表失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_post_detail(postId: str) -> bool:
     """
@@ -139,9 +139,9 @@ def get_post_detail(postId: str) -> bool:
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("浏览帖子任务失败", f"浏览帖子任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("浏览帖子任务失败", f"浏览帖子任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_like(postId: str,toUserId: str) -> bool:
     """
@@ -173,9 +173,9 @@ def do_like(postId: str,toUserId: str) -> bool:
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_unlike(postId: str,toUserId: str) -> bool:
     """
@@ -206,9 +206,9 @@ def do_unlike(postId: str,toUserId: str) -> bool:
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_share(postId: str) -> bool:
     """
@@ -230,9 +230,9 @@ def do_share(postId: str) -> bool:
     elif response["code"] == 501:
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("社区分享任务失败", f"社区分享任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("社区分享任务失败", f"社区分享任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_signin_bbs() -> str:
     """
@@ -267,9 +267,9 @@ def do_signin_bbs() -> str:
         message += "库街区社区今天已经签到过了，无需签到。"
         return message
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("库街区签到失败", f"库街区签到失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("库街区签到失败", f"库街区签到失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_signin_game_awards_list(roleId: str, server_id: str) -> tuple[int, str, str]:
     """
@@ -317,9 +317,9 @@ def get_signin_game_awards_list(roleId: str, server_id: str) -> tuple[int, str, 
     elif response["code"] == 220:
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量kurobbs的值！")
     elif response["code"] == 500:
-        raise SPException("失败", f"请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
+        raise SPException("获取鸣潮游戏签到奖励失败", f"获取鸣潮游戏签到奖励失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("获取鸣潮游戏签到奖励失败", f"获取鸣潮游戏签到奖励失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def do_signin_game(award: str, signin_time: int, roleId: str, server_id: str) -> str:
     """
@@ -342,7 +342,7 @@ def do_signin_game(award: str, signin_time: int, roleId: str, server_id: str) ->
     }
     response = get_response(url, data, 1)
     if response["code"] == 200:
-        message += f"鸣潮游戏签到成功：当月已签到 {signin_time} 天，今天的游戏签到奖励是{award}。"
+        message += f"鸣潮游戏签到成功：当月已签到 {signin_time} 天。今天的游戏签到奖励是{award}。"
         return message
     elif response["code"] == 220:
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量kurobbs的值！")
@@ -350,7 +350,7 @@ def do_signin_game(award: str, signin_time: int, roleId: str, server_id: str) ->
         message += f"鸣潮游戏今天已经签到过了，今天的游戏签到奖励是 {award}。"
         return message
     else:
-        raise SPException("失败", f"请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
+        raise SPException("鸣潮游戏签到失败", f"鸣潮游戏签到失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
 def get_response(url: str, data: dict[str, str], headers_type: int) -> any:
     """
@@ -543,16 +543,16 @@ if __name__ == "__main__":
         except SPException as e:
             # 主动抛出的异常，用于在出现非访问失败的问题时中断后续函数执行
             util.send_log(e.content, "error")
-            util.send_notify(f"【{e.title}】鸣潮·签到", e.content)
+            util.send_notify(f"【{e.title}】鸣潮·签到", f"{notify_content}{e.content}")
         except requests.RequestException as e:
             # API访问失败的异常中断
             util.send_log(f"API请求失败 - {e}", "error")
-            util.send_notify("【失败】鸣潮·签到", f"API请求失败，请查看日志！\n\n错误信息：{e}")
+            util.send_notify("【失败】鸣潮·签到", f"{notify_content}API请求失败，请查看日志！\n\n错误信息：{e}")
         except Exception as e:
             # 其他所有异常
             util.send_log(f"程序运行报错 - {e}", "critical")
             util.send_log(f"{traceback.format_exc()}", "critical")
-            util.send_notify("【程序报错】鸣潮·签到", f"程序运行报错，请查看日志！\n\n错误信息：{e}")
+            util.send_notify("【程序报错】鸣潮·签到", f"{notify_content}程序运行报错，请查看日志！\n\n错误信息：{e}")
 
     else:
         util.send_log(f"缺少环境变量配置！需要添加环境变量：{value_check}", "error")
