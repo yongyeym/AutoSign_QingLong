@@ -11,12 +11,18 @@ import requests
 from Utility.common import common_util as util
 from Utility.common.common_util import SPException
 
-# 用于给不同API的请求头Content-Length赋值
-CONTENT_LENGTH_NUM = {"forum/list" : "78", "forum/like" : "146", "shareTask" : "10", "getPostDetail" : "58", "TaskProcess" : "10", "signIn" : "10", "signInGame" : "38", "signin/show" : "10", "user/mineV2" : "6"}
 # 获取一个随机生成的UUID，在本次运行期间使用，用于给请求头的devCode赋值
 UUID = util.get_uuid(4, True, False)
 # 从环境变量或本地ini文件获取Cookie
-ACCOUNT, GAMESIGN_KEY, GAMESIGN_PARAM = util.get_config_env("dnabbs", "dna_gamesign_key", "dna_gamesign_param", section="COOKIE") if util.USE_LOCAL_COOKIE else util.get_os_env("dnabbs", "dna_gamesign_key", "dna_gamesign_param")
+ACCOUNT = util.get_config_env("dnabbs", section="COOKIE")[0] if util.USE_LOCAL_COOKIE else util.get_os_env("dnabbs")[0]
+
+def get_tn_key() -> str:
+    """
+    计算签名验证Key值，网页版Headers中Tn的值
+    :return: 返回本次请求的签名验证Key值
+    """
+    # 无法实现，搁置
+    pass
 
 def get_dnabbs_userid() -> str:
     """
@@ -28,12 +34,14 @@ def get_dnabbs_userid() -> str:
     data = {
         'type': "1"  # 未知用途
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["user/mineV2"])
-    if response["code"] == 200:
+    response = get_response(url, data)
+    if response["code"] == 200 or response["code"] == "200":
         return  response["data"]["mine"]["userId"]
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 500:
+    elif response["code"] == 10000 or response["code"] == "10000":
+        raise SPException("API参数错误", "request请求头参数错误，可能是官方更改了相关参数，请等待脚本更新！")
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("获取账号ID失败", f"获取账号ID失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("获取账号ID失败",f"获取账号ID失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -51,8 +59,8 @@ def get_dnabbs_taskprocess(userId: str) -> tuple[int, ...]:
         'gameId': "268",  # 对应游戏ID 268=二重螺旋
         'userId': userId  # 用户ID
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["TaskProcess"])
-    if response["code"] == 200:
+    response = get_response(url, data)
+    if response["code"] == 200 or response["code"] == "200":
         data = response["data"]["dailyTask"]
         for i in range(len(data)):
             if data[i]['remark'] == "完成5次点赞":
@@ -66,9 +74,11 @@ def get_dnabbs_taskprocess(userId: str) -> tuple[int, ...]:
             if data[i]['remark'] == "签到":
                 bbs_sign = data[i]['times'] - data[i]['completeTimes']
         return int(read), int(like), int(share), int(bbs_sign), int(comment)
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 500:
+    elif response["code"] == 10000 or response["code"] == "10000":
+        raise SPException("API参数错误", "request请求头参数错误，可能是官方更改了相关参数，请等待脚本更新！")
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("获取社区每日任务进度失败", f"获取社区每日任务进度失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("获取社区每日任务进度失败",f"获取社区每日任务进度失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -92,13 +102,15 @@ def get_dnabbs_new_formlist() -> tuple[str, str]:
         'timeType': "0",  # 未知用途
         'topicId': "",  # 话题ID
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["forum/list"])
-    if response["code"] == 200:
+    response = get_response(url, data)
+    if response["code"] == 200 or response["code"] == "200":
         data = response["data"]["postList"][0]
         return data["postId"], data["userId"]
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 500:
+    elif response["code"] == 10000 or response["code"] == "10000":
+        raise SPException("API参数错误", "request请求头参数错误，可能是官方更改了相关参数，请等待脚本更新！")
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("获取最新帖子列表失败", f"获取最新帖子列表失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("获取最新帖子列表失败", f"获取最新帖子列表失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -116,14 +128,16 @@ def get_post_detail(postId: str) -> bool:
         'postId': postId,  # 帖子ID
         'showOrderType': "1"  # 未知用途
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["getPostDetail"])
-    if response["code"] == 200:
+    response = get_response(url, data)
+    if response["code"] == 200 or response["code"] == "200":
         return False
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 501:
+    elif response["code"] == 501 or response["code"] == "501":
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
-    elif response["code"] == 500:
+    elif response["code"] == 10000 or response["code"] == "10000":
+        raise SPException("API参数错误", "request请求头参数错误，可能是官方更改了相关参数，请等待脚本更新！")
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("浏览帖子任务失败", f"浏览帖子任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("浏览帖子任务失败", f"浏览帖子任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -150,14 +164,16 @@ def do_like(postId: str, toUserId: str) -> bool:
         'postType': "3",  # 未知用途
         'toUserId': toUserId  # 帖子作者ID
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["forum/like"])
-    if response["code"] == 200:
+    response = get_response(url, data, True)
+    if response["code"] == 200 or response["code"] == "200":
         return False
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 501:
+    elif response["code"] == 501 or response["code"] == "501":
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
-    elif response["code"] == 500:
+    elif response["code"] == 10000 or response["code"] == "10000":
+        raise SPException("API参数错误", "request请求头参数错误，可能是官方更改了相关参数，请等待脚本更新！")
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -183,14 +199,16 @@ def do_unlike(postId: str, toUserId: str) -> bool:
         'postType': "3",  # 未知用途
         'toUserId': toUserId  # 帖子作者ID
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["forum/like"])
-    if response["code"] == 200:
+    response = get_response(url, data, True)
+    if response["code"] == 200 or response["code"] == "200":
         return False
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 501:
+    elif response["code"] == 501 or response["code"] == "501":
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
-    elif response["code"] == 500:
+    elif response["code"] == 10000 or response["code"] == "10000":
+        raise SPException("API参数错误", "request请求头参数错误，可能是官方更改了相关参数，请等待脚本更新！")
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("社区点赞任务失败", f"社区点赞任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -205,14 +223,16 @@ def do_share() -> bool:
     data = {
         'gameId': "268"  # 对应游戏ID 268=二重螺旋
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["shareTask"])
-    if response["code"] == 200:
+    response = get_response(url, data)
+    if response["code"] == 200 or response["code"] == "200":
         return False
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 501:
+    elif response["code"] == 501 or response["code"] == "501":
         return True  # 这篇帖子被删除，返回False令程序从获取新的帖子ID步骤从新开始执行
-    elif response["code"] == 500:
+    elif response["code"] == 10000 or response["code"] == "10000":
+        raise SPException("API参数错误", "request请求头参数错误，可能是官方更改了相关参数，请等待脚本更新！")
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("社区分享任务失败", f"社区分享任务失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("社区分享任务失败", f"社区分享任务失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -228,8 +248,8 @@ def do_signin_bbs() -> str:
     data = {
         'gameId': "268"  # 对应游戏ID 268=二重螺旋
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["signIn"])
-    if response["code"] == 200:
+    response = get_response(url, data)
+    if response["code"] == 200 or response["code"] == "200":
         response_data = response["data"]
         response_award = response_data["gainVoList"]
         message += f"皎皎角社区签到成功：当前连续签到 {response_data['continuitySignInDay']} 天，累计签到 {response_data['totalSignInDay']} 天。今天的签到奖励是"
@@ -245,13 +265,13 @@ def do_signin_bbs() -> str:
             else:
                 message += "。"
         return message
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 10000:
+    elif response["code"] == 10000 or response["code"] == "10000":
         #  重复签到情况
-        message += "皎皎角社区今天已经签到过了，无需签到。"
+        message += "皎皎角社区今天已经签到过了，或API请求参数错误，请进入官方APP查看是否签到成功！"
         return message
-    elif response["code"] == 500:
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("皎皎角签到失败", f"皎皎角签到失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("皎皎角签到失败", f"皎皎角签到失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -269,8 +289,8 @@ def get_signin_game_awards_list() -> tuple[int, str, str, str]:
     data = {
         'gameId': "268"  # 对应游戏ID 268=二重螺旋
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["signin/show"])
-    if response["code"] == 200:
+    response = get_response(url, data)
+    if response["code"] == 200 or response["code"] == "200":
         # 确定今天游戏是否签到，true为签到过，false为没有签到
         if response["data"]["todaySignin"]:
             game_sign = 0
@@ -286,9 +306,11 @@ def get_signin_game_awards_list() -> tuple[int, str, str, str]:
                 award = f"「{award_list[i]['awardName']}」*{award_list[i]['awardNum']}"
                 break  # 找到当天的奖励了，直接中断for循环
         return game_sign, periodId, dayAwardId, award
-    elif response["code"] == "220":
+    elif response["code"] == 220 or response["code"] == "220":
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量dnabbs的值！")
-    elif response["code"] == 500:
+    elif response["code"] == 10000 or response["code"] == "10000":
+        raise SPException("API参数错误", "request请求头参数错误，可能是官方更改了相关参数，请等待脚本更新！")
+    elif response["code"] == 500 or response["code"] == "500":
         raise SPException("获取二重螺旋游戏签到奖励失败", f"获取二重螺旋游戏签到奖励失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
     else:
         raise SPException("获取二重螺旋游戏签到奖励失败", f"获取二重螺旋游戏签到奖励失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
@@ -309,9 +331,8 @@ def do_signin_game(periodId: str, dayAwardId: str, award: str) -> str:
         'periodId': periodId,  # 可能是游戏签到月份的ID序号，在encourage/signin/show API的返回中“dayAward”项内的每一组数据，都有一个“periodId”项
         'dayAwardId': dayAwardId,  # 签到奖励列表对应天数的ID，在encourage/signin/show API的返回中“dayAward”项内的每一组数据，都有一个“id”项
         'timeStamp': util.get_timestamp(),  # 获取当前时间戳
-        'sign': GAMESIGN_PARAM,  # API签名
     }
-    response = get_response(url, data, CONTENT_LENGTH_NUM["signInGame"])
+    response = get_response(url, data, True)
     if response["code"] == 200 or response["code"] == "200":
         message += f"二重螺旋游戏签到成功：当月已签到 {response['data']['signinTimeNow']} 天。今天的游戏签到奖励是{award}。"
         return message
@@ -319,7 +340,7 @@ def do_signin_game(periodId: str, dayAwardId: str, award: str) -> str:
         raise SPException("Cookie失效", "Cookie失效，请更新环境变量【dnabbs】的值！")
     elif response["code"] == 10000 or response["code"] == "10000":
         #  重复签到，或任意请求表单传入的值不正确导致签到失败，均会返回此错误信息，无法确定具体是哪个情况
-        message += f"二重螺旋游戏今天已经签到过了，或者API参数错误导致签到失败，今天的游戏签到奖励是 {award}。"
+        message += f"二重螺旋游戏今天已经签到过了，或API请求参数错误，请进入官方APP或游戏内查看是否签到成功（游戏内奖励邮件送达有延迟）！"
         return message
     elif response["code"] == 500 or response["code"] == "500":
         raise SPException("二重螺旋游戏签到失败", f"二重螺旋游戏签到失败！请求被拒绝，请重新尝试或检查日志！错误信息：{response['msg']}")
@@ -328,12 +349,12 @@ def do_signin_game(periodId: str, dayAwardId: str, award: str) -> str:
     else:
         raise SPException("二重螺旋游戏签到失败", f"二重螺旋游戏签到失败！请求出现异常或被拒绝！Code {response['code']} - {response['msg']}")
 
-def get_response(url: str, data: dict[str, str], content_length: str) -> any:
+def get_response(url: str, data: dict[str, str], use_key: bool = False) -> any:
     """
     返回处理为json的response
     :param url: 请求的url
     :param data: 请求的data
-    :param content_length: 请求的content_length
+    :param use_key: 请求头参数是否使用额外的签名验证key参数，用于部分API请求，如游戏签到、点赞
     :return: 返回处理为json的response
     """
     headers = {
@@ -347,21 +368,21 @@ def get_response(url: str, data: dict[str, str], content_length: str) -> any:
         'source': "ios",
         'Accept-Language': "zh-CN,zh-Hans;q=0.9",
         'Accept-Encoding': "gzip, deflate",
-        'Ip': "192.168.3.101",
-        'Content-Length': content_length,
+        'Ip': "192.168.1.2",
         'Connection': "keep-alive",
         'Content-Type': "application/x-www-form-urlencoded; charset=utf-8",
         'model': "iPhone15,4",
         'osVersion': "26.0.1",
         'token': ACCOUNT
     }
-    if url == "https://dnabbs-api.yingxiong.com/encourage/signin/signin":
-        headers["key"] = GAMESIGN_KEY
+    if use_key:
+        headers["Tn"] = "@127"
     last_exception = None
     for i in range(util.URL_RETRY_TIMES):
         try:
             response = requests.post(url, data=data, headers=headers, timeout=util.URL_TIMEOUT)
             response.raise_for_status()  # 如果响应状态码不是200，主动抛出异常进行重试访问
+            util.send_log_debug(f"URL返回：{response.json()}")
             return response.json()
         except requests.RequestException as e:
             last_exception = e
@@ -381,10 +402,7 @@ if __name__ == "__main__":
     value_check = ""  # 存储环境变量为空的变量名用于推送通知正文内容
     if ACCOUNT is None:
         value_check += "【dnabbs】"
-    if GAMESIGN_KEY is None:
-        value_check += "【dna_gamesign_key】"
-    if GAMESIGN_PARAM is None:
-        value_check += "【dna_gamesign_param】"
+    # 二重螺旋游戏签到配置项打开时，检查是否有两个额外环境变量
     if value_check == "":
         try:
             restart_flag = True  # 是否需要重新运行，默认为True用于启动第一次循环执行
@@ -405,14 +423,59 @@ if __name__ == "__main__":
                 time.sleep(2)
                 # 直接使用获取本月游戏签到奖励列表API，其中也会有今天是否签到的data，实际有专门获取今天是否进行社区和游戏签到的API haveSignInNew，但直接使用此API可以同时获取到今天签到必须的表单值和签到奖励内容更方便
                 game_sign, periodId, dayAwardId, award = get_signin_game_awards_list()
+                time.sleep(2)
                 util.send_log(f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、「皎皎角」签到 {'已完成' if bbs_sign == 0 else '未完成'}、「二重螺旋」签到 {'已完成' if game_sign == 0 else '未完成'}。", "info")
                 notify_content += f"今日任务完成情况：点赞{' 已完成' if like == 0 else f'还需 {like} 次'}、浏览{' 已完成' if read == 0 else f'还需 {read} 次'}、分享{' 已完成' if share == 0 else f'还需 {share} 次'}、回复他人帖子{' 已完成' if comment == 0 else f'还需 {comment} 次'}、「皎皎角」签到 {'已完成' if bbs_sign == 0 else '未完成'}、「二重螺旋」签到 {'已完成' if game_sign == 0 else '未完成'}。\n\n"
-                time.sleep(2)
+                # 如果需要社区签到，则执行签到
+                if bbs_sign == 1:
+                    message_bbs_sign = do_signin_bbs()
+                    util.send_log(message_bbs_sign, "info")
+                    notify_content += f"{message_bbs_sign}\n\n"
+                    time.sleep(5)
+                else:
+                    util.send_log("社区签到已完成，不需要进行操作；", "info")
+                    notify_content += "社区签到已完成，不需要进行操作；\n\n"
                 # 如果需要浏览/点赞/分享，则获取帖子列表，返回1组帖子的id和发帖人id
                 if read > 0 or like > 0 or share > 0:
                     postId, postUserId = get_dnabbs_new_formlist()
                     util.send_log("已获取最新帖子列表，开始执行……", "info")
                     time.sleep(2)
+                    # 如果需要浏览次数不为0，则执行浏览
+                    if read > 0:
+                        for i in range(read):
+                            restart_flag = get_post_detail(postId)
+                            if restart_flag:
+                                util.send_log(
+                                    f"执行第{i + 1}次浏览帖子操作时出现意外错误，可能是操作的帖子被删除了，重新开始社区交互任务执行流程……",
+                                    "warning")
+                                break  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中止当前for循环
+                            else:
+                                util.send_log(f"执行第{i + 1}次浏览帖子操作完成……", "info")
+                            time.sleep(3)
+                        util.send_log(f"浏览任务完成，执行了{read}次浏览帖子操作；", "info")
+                        notify_content += f"浏览任务完成，执行了{read}次浏览帖子操作；\n\n"
+                    else:
+                        util.send_log("浏览任务已完成，不需要进行操作；", "info")
+                        notify_content += "浏览任务已完成，不需要进行操作；\n\n"
+                    if restart_flag:
+                        continue  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中断后续代码运行并开始新的循环
+                    # 如果需要分享次数不为0，则执行分享帖子
+                    if share > 0:
+                        for i in range(share):
+                            restart_flag = do_share()
+                            if restart_flag:
+                                util.send_log(
+                                    f"执行第{i + 1}次同步分享帖子任务进度操作时出现意外错误，重新开始社区交互任务执行流程……",
+                                    "warning")
+                                break  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中止当前for循环
+                            else:
+                                util.send_log(f"执行第{i + 1}次同步分享帖子任务进度操作完成……", "info")
+                            time.sleep(3)
+                        util.send_log(f"分享任务完成，执行了{share}次分享帖子操作；", "info")
+                        notify_content += f"分享任务完成，执行了{share}次分享帖子操作；\n\n"
+                    else:
+                        util.send_log("分享任务已完成，不需要进行操作；", "info")
+                        notify_content += "分享任务已完成，不需要进行操作；\n\n"
                     # 如果需要点赞次数不为0，则执行点赞
                     if like > 0:
                         for i in range(like):
@@ -437,54 +500,12 @@ if __name__ == "__main__":
                         notify_content += "点赞任务已完成，不需要进行操作；\n\n"
                     if restart_flag:
                         continue  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中断后续代码运行并开始新的循环
-                    # 如果需要浏览次数不为0，则执行浏览
-                    if read > 0:
-                        for i in range(read):
-                            restart_flag = get_post_detail(postId)
-                            if restart_flag:
-                                util.send_log(f"执行第{i + 1}次浏览帖子操作时出现意外错误，可能是操作的帖子被删除了，重新开始社区交互任务执行流程……", "warning")
-                                break  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中止当前for循环
-                            else:
-                                util.send_log(f"执行第{i + 1}次浏览帖子操作完成……", "info")
-                            time.sleep(3)
-                        util.send_log(f"浏览任务完成，执行了{read}次浏览帖子操作；", "info")
-                        notify_content += f"浏览任务完成，执行了{read}次浏览帖子操作；\n\n"
-                    else:
-                        util.send_log("浏览任务已完成，不需要进行操作；", "info")
-                        notify_content += "浏览任务已完成，不需要进行操作；\n\n"
-                    if restart_flag:
-                        continue  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中断后续代码运行并开始新的循环
-                    # 如果需要分享次数不为0，则执行分享帖子
-                    if share > 0:
-                        for i in range(share):
-                            restart_flag = do_share()
-                            if restart_flag:
-                                util.send_log(f"执行第{i + 1}次同步分享帖子任务进度操作时出现意外错误，重新开始社区交互任务执行流程……", "warning")
-                                break  # 访问API返回非致命的错误，跳出循环并重新执行获取新的帖子ID，此处用于中止当前for循环
-                            else:
-                                util.send_log(f"执行第{i + 1}次同步分享帖子任务进度操作完成……", "info")
-                            time.sleep(3)
-                        util.send_log(f"分享任务完成，执行了{share}次分享帖子操作；", "info")
-                        notify_content += f"分享任务完成，执行了{share}次分享帖子操作；\n\n"
-                    else:
-                        util.send_log("分享任务已完成，不需要进行操作；", "info")
-                        notify_content += "分享任务已完成，不需要进行操作；\n\n"
                 else:
                     util.send_log("今日社区交互任务均已完成，不需要进行操作；", "info")
                     notify_content += "今日社区交互任务均已完成，不需要进行操作；\n\n"
             if attempt == 2 and restart_flag:
                 util.send_log("社区交互任务执行出现意外的状况，已重复尝试3次仍未成功，放弃此部分任务的执行！", "error")
                 notify_content += "社区交互任务执行出现意外的状况，已重复尝试3次仍未成功，放弃此部分任务的执行！\n\n"
-
-            # 如果需要社区签到，则执行签到
-            if bbs_sign == 1:
-                message_bbs_sign = do_signin_bbs()
-                util.send_log(message_bbs_sign, "info")
-                notify_content += f"{message_bbs_sign}\n\n"
-                time.sleep(5)
-            else:
-                util.send_log("社区签到已完成，不需要进行操作；", "info")
-                notify_content += "社区签到已完成，不需要进行操作；\n\n"
             # 如果需要游戏签到，则执行签到
             if game_sign == 1:
                 message_game_sign = do_signin_game(periodId, dayAwardId, award)

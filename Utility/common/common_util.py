@@ -21,14 +21,16 @@ DEFAULT_CONFIG = {
 }
 COOKIE_CONFIG = {
     "dnabbs": "",
-    "dna_gamesign_key": "",
-    "dna_gamesign_param": "",
     "kurobbs": "",
     "kuro_uid": "",
     "nga_cookie": "",
     "nga_uid": "",
     "nga_client_checksum": "",
 }
+USE_LOCAL_COOKIE = 0
+URL_TIMEOUT = 15
+URL_RETRY_TIMES = 5
+URL_RETRY_INTERVAL = 5
 
 def get_os_env(*args: str) -> tuple[str | None, ...]:
     """
@@ -318,13 +320,25 @@ class SPException(Exception):
         e2str = f"【{self.title}】\n\n错误详情为：" + self.content  # 定义直接输出e时的显示文本
         return e2str
 
-# 全脚本通用配置项初始化获取
-USE_LOCAL_COOKIE, URL_TIMEOUT, URL_RETRY_TIMES, URL_RETRY_INTERVAL = map(lambda x: int(x) if x.isdigit() else None, get_config_env("use_local_cookie", "url_timeout", "url_retry_times", "url_retry_interval"))
-# 是否使用本地配置文件的Cookie，只有获取的值为1时启用（True），其他值均不启用（False）
-USE_LOCAL_COOKIE = True if USE_LOCAL_COOKIE == 1 else False
-if USE_LOCAL_COOKIE:
-    send_log("当前配置：使用本地配置文件中的Cookie！", "info")
-# URL请求超时时间（秒）、重试次数、重试间隔（秒），获取的值不是整数时使用默认值：超时15秒、重试5次、间隔5秒
-URL_TIMEOUT = URL_TIMEOUT if URL_TIMEOUT is not None else 15
-URL_RETRY_TIMES = URL_RETRY_TIMES if URL_RETRY_TIMES is not None else 5
-URL_RETRY_INTERVAL = URL_RETRY_INTERVAL if URL_RETRY_INTERVAL is not None else 5
+def init():
+    """
+    全脚本通用配置项初始化，检测配置文件或配置项是否存在，不存在则创建；并获取必要的值作为全局变量供其他脚本使用
+    """
+    global USE_LOCAL_COOKIE, URL_TIMEOUT, URL_RETRY_TIMES, URL_RETRY_INTERVAL
+    # 全脚本通用配置项初始化获取
+    config_values = get_config_env("use_local_cookie", "url_timeout", "url_retry_times", "url_retry_interval", "dna_gamesign")
+    # 配置项数值处理，获取到的值转整数，若获取到的值不是整数，则使用全局变量预先定义的默认值
+    USE_LOCAL_COOKIE, URL_TIMEOUT, URL_RETRY_TIMES, URL_RETRY_INTERVAL = [
+        int(x) if x.isdigit() else globals()[var_name]
+        for var_name, x in zip(
+            ["USE_LOCAL_COOKIE", "URL_TIMEOUT", "URL_RETRY_TIMES", "URL_RETRY_INTERVAL"],
+            config_values
+        )
+    ]
+    # 是否使用本地配置文件的Cookie，只有获取的值为1时启用（True），其他值均不启用（False）
+    USE_LOCAL_COOKIE = True if USE_LOCAL_COOKIE == 1 else False
+    if USE_LOCAL_COOKIE:
+        send_log("当前配置：使用本地配置文件中的Cookie！", "info")
+
+# 初始化执行的内容
+init()
